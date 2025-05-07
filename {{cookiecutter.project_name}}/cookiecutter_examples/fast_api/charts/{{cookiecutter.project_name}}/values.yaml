@@ -1,0 +1,27 @@
+namespace:
+
+usecase: general
+
+## Env variables need to be placed here (names need to coincide with variables avaiable for release pipeline). 
+## Example
+# VariableNameGroup:
+#   variable1:
+#   variable2:
+# VariableWithNoGroup:
+
+image:
+{% if cookiecutter.empowered_environment == "Central Risk" %}
+  repository: datemenctre.azurecr.io
+{% elif cookiecutter.empowered_environment == "Portfolio Strategy" %}
+  repository: datemenpsctre.azurecr.io
+{% endif %}
+  name: {{cookiecutter.project_name}}
+  port: 80
+
+replicaCount: 1
+
+ingress:
+  cert:
+    issuer:
+  domain:
+    host::

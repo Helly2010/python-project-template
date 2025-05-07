@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-{{ .Values.run_name }}  # TODO: replace job- with your usecase specific prefix
+  namespace: {{ .Values.namespace }}
+spec:
+  backoffLimit: 1
+  activeDeadlineSeconds: 900
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.image.name }}
+    spec:
+      restartPolicy: Never
+      # TODO: update example node selection filter. Example below schedules jobs only on "my-job" dedicated nodes.
+      # (keep inactive/delete to schedule jobs to default node pool. Not recommended!)
+      # tolerations:
+      # - key: dedicated
+      #   operator: "Equal"
+      #   value: "my-job"
+      #   effect: NoSchedule
+      # nodeSelector:
+      #   dedicated: "my-job"
+      imagePullSecrets:
+        - name: acr-image-pull-secret
+      containers:
+        - name: {{ .Values.image.name }}
+          image: {{ .Values.image.repository }}/{{ .Values.image.name }}:{{ default .Chart.AppVersion .Values.image.tag }}
+          imagePullPolicy: Always
+          command:
+            - "poetry"
+            - "run"
+            - "python"
+            - "{{ package_name }}/run.py" # TODO: replace package_name with real package name
+            - "--arg_1={{ .Values.arg_1 }}"
+            - "--arg_2={{ .Values.arg_2 }}"
+          # env:
+          # - name: env_1_name
+          #   value: env_1_value

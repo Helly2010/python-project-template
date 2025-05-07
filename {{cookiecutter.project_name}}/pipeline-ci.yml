@@ -1,0 +1,89 @@
+# Actual CI pipeline that is executed in Azure DevOps
+trigger:
+  branches:
+    include:
+    - '*'
+  {% if cookiecutter.auto_publish != 'n' -%}
+  tags:
+    include:
+    - '*'
+  {% endif %}
+  
+resources:
+  repositories:
+  - repository: self
+  - repository: template_repository
+    type: git
+{%- if cookiecutter.empowered_environment == "Central Risk" %}
+    name: aks-devops-emen-cr
+    ref: refs/tags/1.1.2a0
+{%- elif cookiecutter.empowered_environment == "Portfolio Strategy" %}
+    name: aks-devops-emen-emps
+    ref: refs/tags/1.4.0
+{% endif %}
+
+variables:
+- template: pipeline/templates/vars.yaml@template_repository
+- name: applicationName
+  value: '{{cookiecutter.project_name}}'
+- name: pythonLintFolder
+  value: '{{cookiecutter.package_name}}/'
+- name: pythonTestFolder
+  value: 'tests'
+- name: useMypyTests
+  value: '{{cookiecutter.use_mypy_tests}}'
+- name: pytestMarks
+  value: 'not nothing' # "not nothing" is default dummy value presumed not to be applicable anywhere.
+stages:
+- stage: testStage
+  displayName: 'Tests'
+  {% if cookiecutter.auto_publish != 'n' -%}
+  condition: not(and(contains(variables['build.sourceBranch'], 'refs/heads/') , contains(variables['build.SourceVersionMessage'], '[skip ci on heads]')))
+  {% endif %}
+  jobs:
+  - job: LintingTypingTestStage
+    displayName: 'Application: linting, typing, testing (code coverage)'
+    pool:
+      vmImage: '$(vmImageName)'
+    steps:
+      - task: UsePythonVersion@0
+        displayName: 'Determine Python version'
+        inputs:
+          versionSpec: '{{cookiecutter.python_major_version}}.{{cookiecutter.python_minor_version}}'
+          architecture: 'x64'
+  {% if cookiecutter.use_international_collaboration_packages != 'n' -%}
+      - template: pipeline/templates/poetry-authenticate.yml@template_repository
+  {% endif %}
+      - template: pipeline/templates/test-unit-linting-job-poetry-pytest-marks.yml@template_repository
+  {% if cookiecutter.auto_publish == 'y' and cookiecutter.project_type=='fast_api' -%}
+  - template: pipeline/templates/test-helm-job.yml@template_repository
+  {% endif %}
+
+{% if cookiecutter.auto_publish == 'y' and cookiecutter.project_type=='python_package' -%}
+- stage: publishStage
+  displayName: 'Publish'
+  condition: and(succeeded(), startsWith(variables['build.sourceBranch'], 'refs/tags/'))
+  dependsOn: testStage
+  jobs:
+  - job: Publishing
+    displayName: 'Application: publishing python package'
+    pool:
+      vmImage: '$(vmImageName)'
+    steps:
+      - task: UsePythonVersion@0
+        displayName: 'Determine Python version'
+        inputs:
+          versionSpec: '{{cookiecutter.python_major_version}}.{{cookiecutter.python_minor_version}}'
+          architecture: 'x64'
+      - template: pipeline/templates/publish-python-package-poetry.yml@template_repository 
+{% endif %}
+
+{% if cookiecutter.auto_publish == 'y' and cookiecutter.project_type=='fast_api' -%}
+- stage: buildStage
+  displayName: 'Build'
+  condition: and(succeeded(), startsWith(variables['build.sourceBranch'], 'refs/tags/'))
+  dependsOn: testStage
+  jobs:
+  - template: pipeline/templates/build-docker-job-poetry.yml@template_repository
+  - template: pipeline/templates/build-helm-job.yml@template_repository
+{% endif %}

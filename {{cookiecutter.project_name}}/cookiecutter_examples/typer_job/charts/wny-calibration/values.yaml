@@ -1,0 +1,22 @@
+namespace:
+usecase: general
+
+## Env variables need to be placed here (names need to coincide with variables
+# avaiable for release pipeline and CLI arguments to the job). 
+# arg_1:
+# arg_2:
+
+image:
+  repository: datemenpsctre.azurecr.io
+  name: {{cookiecutter.project_name}}
+  port: 80
+
+replicaCount: 1
+
+resources:
+  requests:
+    cpu: 800m
+    memory: 200Mi
+  limits:
+    cpu: 1200m
+    memory: 600Mi

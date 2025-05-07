@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "python-template"
+version = "202205.1004"
+description = "Template for Python projects."
+authors = ["Jakub Urban <jakub.urban@innogy.com>", "Joris van Iersel <joris.van.iersel@essent.nl>", "Martin Tlapák <martin.tlapak@eon.com>", "Radim Cajzl <radim.cajzl@eon.com>"]
+
+[tool.poetry.dependencies]
+python= "^3.7"
+cookiecutter = "*"
+
+[tool.poetry.dev-dependencies]
+bumpver = "^2021.1109"
+
+[bumpver.file_patterns]
+"pyproject.toml" = [
+    'current_version = "{version}"',
+    'version = "{pep440_version}"',
+]
+"{{cookiecutter.project_name}}/README.md" = [
+    '{version}',
+]
+
+[bumpver]
+current_version = "202205.1004"
+version_pattern = "YYYY0M.BUILD[-TAG]"
+commit = true
+tag = true
+push = true

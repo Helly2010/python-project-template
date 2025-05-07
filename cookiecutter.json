@@ -1,0 +1,40 @@
+{
+    "full_name": "Your Name",
+    "email": "you@eon.com",
+    "project_name": "project-name",
+    "package_name": "package_name",
+    "version_pattern": [
+        "YYYY0M.BUILD[-TAG]",
+        "MAJOR.MINOR.PATCH[PYTAGNUM]"
+    ],
+    "project_short_description": "",
+    "python_major_version": 3,
+    "python_minor_version": 9,
+    "use_mypy_tests": [
+        1,
+        0
+    ],
+    "project_type": [
+        "python_package",
+        "fast_api",
+        "typer_job"
+    ],
+    "auto_publish": [
+        "y",
+        "n"
+    ],
+    "use_international_collaboration_packages": [
+        "y",
+        "n"
+    ],
+    "empowered_environment": [
+        "Central Risk",
+        "Portfolio Strategy"
+    ],
+    "_extensions": [
+        "jinja2_time.TimeExtension"
+    ],
+    "_copy_without_render": [
+        "cookiecutter_examples/*/charts/*/templates/*.yaml"
+    ]
+}
