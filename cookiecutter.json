@@ -32,7 +32,7 @@
         "Portfolio Strategy"
     ],
     "_extensions": [
-        "jinja2_time.TimeExtension"
+       
     ],
     "_copy_without_render": [
         "cookiecutter_examples/*/charts/*/templates/*.yaml"
